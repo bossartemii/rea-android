@@ -19,13 +19,16 @@ export const bundleRuntime = async (root) => {
 
   // Rolldown can emit empty entrypoints under Android/Termux ARM64.
   // Keep the TypeScript ESM output on Android; the dispatcher supports it.
-  if (
-    process.platform === "android" ||
-    process.env.REA_SKIP_RUNTIME_BUNDLING === "1"
-  ) {
+  const skipReason =
+    process.platform === "android"
+      ? "Android detected"
+      : process.env.REA_SKIP_RUNTIME_BUNDLING === "1"
+        ? "REA_SKIP_RUNTIME_BUNDLING=1"
+        : undefined;
+  if (skipReason !== undefined) {
     await requireNonEmptyFiles(compiledRoot, compiledEntries, "TypeScript");
     process.stdout.write(
-      "Android detected; skipping Rolldown and keeping compiled runtime modules.\n",
+      `${skipReason}; skipping Rolldown and keeping compiled runtime modules.\n`,
     );
     return;
   }

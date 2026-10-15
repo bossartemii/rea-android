@@ -1,8 +1,8 @@
-import { readFile, readdir } from "node:fs/promises";
+import { access, readFile, readdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { describe, expect } from "vitest";
+import { describe, expect, vi } from "vitest";
 
 import { bundleRuntime } from "../../../scripts/bundle-runtime.mjs";
 import { workspaceCliTest } from "../../support/cli/workspaceCliFixture.js";
@@ -152,6 +152,44 @@ export const run = async () => {
             "Unsupported import.meta use in runtime bundle",
           );
         }
+      }
+    },
+  );
+});
+
+describe("skipped runtime bundling", () => {
+  workspaceCliTest(
+    "keeps compiled runtime modules and rejects empty ones when bundling is skipped",
+    async ({ workspace }) => {
+      await workspace.mkdir("dist/cli");
+      await workspace.write("package.json", '{"type":"module"}');
+      const files = {
+        "dist/main.js": "export const runEntrypoint = () => undefined;\n",
+        "dist/mcpDoctor.js": "export {};\n",
+        "dist/cli.js": "export {};\n",
+        "dist/cliOutput.js": "export {};\n",
+        "dist/cli/cliResultOutput.js": "export {};\n",
+      };
+      for (const [path, contents] of Object.entries(files))
+        await workspace.write(path, contents);
+      vi.stubEnv("REA_SKIP_RUNTIME_BUNDLING", "1");
+      try {
+        await bundleRuntime(workspace.root);
+        for (const [path, contents] of Object.entries(files))
+          expect(await readFile(join(workspace.root, path), "utf8")).toBe(
+            contents,
+          );
+        await expect(
+          access(join(workspace.root, "dist/mcp")),
+        ).rejects.toMatchObject({ code: "ENOENT" });
+
+        await workspace.write("dist/main.js", "");
+        await rm(join(workspace.root, "dist/cliOutput.js"));
+        await expect(bundleRuntime(workspace.root)).rejects.toThrow(
+          "TypeScript did not produce non-empty runtime files: main.js, cliOutput.js",
+        );
+      } finally {
+        vi.unstubAllEnvs();
       }
     },
   );
