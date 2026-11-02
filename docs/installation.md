@@ -11,6 +11,43 @@ Setup previews configuration changes and asks for approval before applying them.
 | Update or remove REA              | [Maintenance](#diagnose-update-and-remove)                                |
 | Resolve a client-specific problem | [Client configuration](client-configuration.md)                           |
 
+## Android (Termux)
+
+REA supports a dedicated Android build path for the official Termux app. Use a
+source checkout on the Android device; the generic Linux installer is not a
+substitute for the Termux build because Android uses Bionic-linked Node.js and
+may require different native dependency handling.
+
+Install Termux from its official distribution, then install Git and clone this
+repository:
+
+```sh
+pkg update -y
+pkg install -y git
+git clone https://github.com/bossartemii/rea-android.git
+cd rea-android
+bash scripts/install-termux.sh
+```
+
+The installer checks that it is running as the unprivileged Termux app user,
+installs the Termux Node.js/npm packages, validates the supported Node.js
+version, installs the locked dependencies, runs `npm run build:termux`, and
+installs the resulting CLI globally. It does not use `sudo`, a desktop Node.js
+binary, or native artifacts copied from another operating system.
+
+After installation, configure an agent and run diagnostics:
+
+```sh
+rea setup
+rea doctor --json
+```
+
+Android support is not equivalent to desktop Linux support: optional native
+analysis engines and tools that require a desktop OS, privileged access, or
+unsupported CPU binaries may remain unavailable. Use the scoped doctor
+diagnostics to distinguish those optional limitations from core CLI/MCP
+readiness.
+
 ## Start setup
 
 ```bash
