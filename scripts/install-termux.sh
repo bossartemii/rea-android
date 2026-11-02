@@ -21,7 +21,7 @@ command -v pkg >/dev/null 2>&1 || fail "Termux pkg is unavailable."
 device_arch="$(uname -m)"
 case "$device_arch" in
   aarch64|arm64) ;;
-  *) fail "unsupported Android ABI '$device_arch'; this installer targets 64-bit ARM (aarch64), as used by Pixel devices." ;;
+  *) fail "unsupported Android ABI '$device_arch'; this installer targets 64-bit ARM (aarch64), used by current Pixel and Galaxy devices." ;;
 esac
 
 android_model="$(getprop ro.product.model 2>/dev/null || true)"
