@@ -38,7 +38,7 @@ df -h "$HOME" 2>/dev/null | tail -n 1 || true
 
 printf '\nUpdating Termux packages and installing build prerequisites...\n'
 pkg update -y
-pkg install -y nodejs-lts npm git termux-exec python clang make pkg-config
+pkg install -y nodejs-lts npm git x11-repo termux-exec
 
 command -v node >/dev/null 2>&1 || fail "Node.js was not installed."
 command -v npm >/dev/null 2>&1 || fail "npm was not installed."
