@@ -11,42 +11,51 @@ Setup previews configuration changes and asks for approval before applying them.
 | Update or remove REA              | [Maintenance](#diagnose-update-and-remove)                                |
 | Resolve a client-specific problem | [Client configuration](client-configuration.md)                           |
 
-## Android (Termux)
+## Google Pixel (Android, Termux)
 
-REA supports a dedicated Android build path for the official Termux app. Use a
-source checkout on the Android device; the generic Linux installer is not a
-substitute for the Termux build because Android uses Bionic-linked Node.js and
-may require different native dependency handling.
+The supported mobile path is the official **Termux** app. The installer is
+optimized for 64-bit ARM Android devices such as Google Pixel phones; it checks
+the Android runtime and Node.js ABI before building. It deliberately compiles
+on the phone instead of copying Linux, desktop, or emulator binaries.
 
-Install Termux from its official distribution, then install Git and clone this
-repository:
+Install Termux from its official source, open it, then run:
 
 ```sh
 pkg update -y
 pkg install -y git
 git clone https://github.com/bossartemii/rea-android.git
 cd rea-android
+git checkout feat/android-termux-installer
 bash scripts/install-termux.sh
 ```
 
-The installer checks that it is running as the unprivileged Termux app user,
-installs the Termux Node.js/npm packages, validates the supported Node.js
-version, installs the locked dependencies, runs `npm run build:termux`, and
-installs the resulting CLI globally. It does not use `sudo`, a desktop Node.js
-binary, or native artifacts copied from another operating system.
+The installer reports the detected model, Android release/API, CPU ABI, visible
+RAM and available home storage. It requires ARM64 Node.js and a Node version
+supported by REA, installs the repository-pinned npm version, then installs
+build prerequisites, locked dependencies and the Termux-specific build. It
+does not use root, a desktop Node binary, or native artifacts copied from
+another operating system.
 
-After installation, configure an agent and run diagnostics:
+After installation:
 
 ```sh
 rea setup
 rea doctor --json
 ```
 
-Android support is not equivalent to desktop Linux support: optional native
-analysis engines and tools that require a desktop OS, privileged access, or
-unsupported CPU binaries may remain unavailable. Use the scoped doctor
-diagnostics to distinguish those optional limitations from core CLI/MCP
-readiness.
+**Pixel background reliability:** if you keep a REA process running for long
+sessions, open Android Settings → Apps → Termux → App battery usage and select
+Unrestricted (wording can vary by Android release). Battery optimization can
+stop background terminal processes; this setting does not increase REA's
+permissions or bypass Android sandboxing.
+
+Android support is not equivalent to desktop Linux support. Optional analysis
+engines that require desktop operating systems, privileged access, Java desktop
+components or unsupported native binaries can remain unavailable. Use
+`rea doctor --json` to distinguish core CLI/MCP readiness from optional
+provider limitations. The ARM64 installer path has not been certified on every
+Pixel firmware build; run the diagnostics on the target phone before relying on
+it for production work.
 
 ## Start setup
 
