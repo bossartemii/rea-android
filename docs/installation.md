@@ -11,6 +11,112 @@ Setup previews configuration changes and asks for approval before applying them.
 | Update or remove REA              | [Maintenance](#diagnose-update-and-remove)                                |
 | Resolve a client-specific problem | [Client configuration](client-configuration.md)                           |
 
+## Google Pixel (Android, Termux)
+
+The supported mobile path is the official **Termux** app. The installer is
+optimized for 64-bit ARM Android devices such as Google Pixel phones; it checks
+the Android runtime and Node.js ABI before building. It deliberately compiles
+on the phone instead of copying Linux, desktop, or emulator binaries.
+
+Install Termux from its official source, open it, then run:
+
+```sh
+pkg update -y
+pkg install -y git
+git clone https://github.com/bossartemii/rea-android.git
+cd rea-android
+git checkout feat/android-termux-installer
+bash scripts/install-termux.sh
+```
+
+The installer reports the detected model, Android release/API, CPU ABI, visible
+RAM and available home storage. It requires ARM64 Node.js and a Node version
+supported by REA, installs the repository-pinned npm version, then installs
+build prerequisites, locked dependencies and the Termux-specific build. It
+does not use root, a desktop Node binary, or native artifacts copied from
+another operating system.
+
+After installation:
+
+```sh
+rea setup
+rea doctor --json
+```
+
+**Pixel background reliability:** if you keep a REA process running for long
+sessions, open Android Settings → Apps → Termux → App battery usage and select
+Unrestricted (wording can vary by Android release). Battery optimization can
+stop background terminal processes; this setting does not increase REA's
+permissions or bypass Android sandboxing.
+
+Android support is not equivalent to desktop Linux support. Optional analysis
+engines that require desktop operating systems, privileged access, Java desktop
+components or unsupported native binaries can remain unavailable. Use
+`rea doctor --json` to distinguish core CLI/MCP readiness from optional
+provider limitations. The ARM64 installer path has not been certified on every
+Pixel firmware build; run the diagnostics on the target phone before relying on
+it for production work.
+
+## Google Android Linux Terminal (Debian VM)
+
+On supported Pixel devices, Android's experimental **Linux development
+environment** launches a Debian userspace inside an Android Virtualization
+Framework (AVF) virtual machine. This is a real Linux guest, not Termux: it
+uses the Linux/glibc runtime rather than Android/Bionic. Enable it in
+Settings → System → Developer options → Linux development environment, then
+open the Terminal app. Availability depends on device and Android build.
+
+From the Terminal app, install the basic tools and obtain this repository:
+
+```sh
+sudo apt update
+sudo apt install -y git curl
+git clone https://github.com/bossartemii/rea-android.git
+cd rea-android
+git checkout feat/android-termux-installer
+bash scripts/install-android-linux.sh
+```
+
+The installer currently targets Debian/Ubuntu-family ARM64 guests using glibc.
+It installs build prerequisites and Node.js 24, checks the actual guest
+platform/architecture, installs the repository-pinned npm version, builds
+inside the VM, and installs REA for the Linux guest. It does not reuse
+Termux/Bionic binaries. Afterward run `rea setup` and `rea doctor --json`.
+
+This is a separate Linux guest install, so files and tools installed in Termux
+are not automatically available inside Debian, and vice versa. Android may
+pause or stop the VM when resources are constrained. The installer has not
+yet been executed on a physical Pixel Linux Terminal VM; treat this as an
+implementation path pending device validation, not a certified compatibility
+claim. Optional REA providers still depend on their own Linux/ARM64 support.
+
+## Samsung Galaxy (Android, Termux)
+
+Samsung Galaxy phones with a 64-bit ARM Android userspace use the same Termux
+installation path as Google Pixel. Snapdragon and Exynos are both supported at
+the CPU-architecture level; the installer checks the actual runtime ABI instead
+of relying on the phone's marketing name. One UI battery management can stop
+long-running terminal processes, so set Termux's battery usage to
+**Unrestricted** when persistent background work is required. Menu labels vary
+by One UI version.
+
+The same caveat applies as on Pixel: this is an ARM64/Termux build path, not a
+claim that every optional native reverse-engineering provider runs on Android.
+
+## iPhone and iPad (iOS)
+
+**Native local installation is not supported by this Termux installer.**
+Termux is an Android application and cannot be installed on iOS. iOS also does
+not provide the general-purpose background process and native dependency
+environment expected by REA's current Node.js CLI and stdio MCP server.
+
+To support iPhone and iPad properly, REA needs a separate remote architecture:
+run the REA server on a supported computer or server, expose an authenticated
+remote MCP transport over HTTPS, and connect an iOS-compatible MCP client.
+That transport and client integration are not delivered by this Android
+installer branch. Do not follow the Termux commands on iOS or treat an
+iSH/a-Shell workaround as supported REA installation.
+
 ## Start setup
 
 ```bash

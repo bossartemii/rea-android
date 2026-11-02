@@ -139,6 +139,55 @@ Review the setup changes and restart your agent. For one-off CLI commands,
 use `npx rea-agents@latest` followed by the command. With Bun, use
 `bunx rea-agents@latest` in place of `npx rea-agents@latest`.
 
+## Android and mobile Linux
+
+REA includes experimental installation paths for 64-bit ARM Android devices and
+the Debian Linux virtual machine available on supported Google Pixel builds.
+These are separate environments with different Node.js runtimes; do not reuse
+binaries or dependencies between them.
+
+### Android with Termux
+
+On ARM64 Android devices, the Termux installer checks the Android Node.js
+runtime and builds REA on the device:
+
+```bash
+pkg update -y
+pkg install -y git
+git clone https://github.com/bossartemii/rea-android.git
+cd rea-android
+git checkout feat/android-termux-installer
+bash scripts/install-termux.sh
+```
+
+### Google Android Linux Terminal
+
+On supported Pixel devices where Android's Linux development environment is
+available, the Terminal app runs a Debian ARM64 guest using Linux/glibc. Use
+the separate guest installer:
+
+```bash
+sudo apt update
+sudo apt install -y git curl
+git clone https://github.com/bossartemii/rea-android.git
+cd rea-android
+git checkout feat/android-termux-installer
+bash scripts/install-android-linux.sh
+```
+
+Both paths build from source in their own environment. After installation,
+run `rea setup` and `rea doctor --json`. The Linux guest installer currently
+targets Debian/Ubuntu-family ARM64 guests with glibc. The Termux path targets
+Android ARM64/Bionic. Optional analysis providers have their own host and
+architecture requirements and may not be available on Android.
+
+**Compatibility status:** these installers are experimental and have not been
+validated on every device or firmware. In particular, the Debian guest
+installer has not yet been run on a physical Pixel Linux Terminal VM. Check
+the [installation guide](docs/installation.md) for prerequisites, limitations,
+and device-specific notes. Native local installation on iPhone/iPad is not
+supported; iOS requires a separately deployed remote REA/MCP host.
+
 ## How REA works
 
 Your agent calls REA through MCP to inspect the target and trace relevant code.
