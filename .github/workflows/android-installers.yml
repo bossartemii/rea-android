@@ -1,0 +1,29 @@
+name: Android installer checks
+
+on:
+  push:
+    branches: [main, "feat/**"]
+    paths:
+      - "scripts/install-termux.sh"
+      - "scripts/install-android-linux.sh"
+      - "scripts/verify-android-installers.sh"
+      - ".github/workflows/android-installers.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/install-termux.sh"
+      - "scripts/install-android-linux.sh"
+      - "scripts/verify-android-installers.sh"
+      - ".github/workflows/android-installers.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  installer-guards:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Verify shell syntax and platform fail-fast guards
+        run: bash scripts/verify-android-installers.sh
