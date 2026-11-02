@@ -57,6 +57,39 @@ provider limitations. The ARM64 installer path has not been certified on every
 Pixel firmware build; run the diagnostics on the target phone before relying on
 it for production work.
 
+## Google Android Linux Terminal (Debian VM)
+
+On supported Pixel devices, Android's experimental **Linux development
+environment** launches a Debian userspace inside an Android Virtualization
+Framework (AVF) virtual machine. This is a real Linux guest, not Termux: it
+uses the Linux/glibc runtime rather than Android/Bionic. Enable it in
+Settings → System → Developer options → Linux development environment, then
+open the Terminal app. Availability depends on device and Android build.
+
+From the Terminal app, install the basic tools and obtain this repository:
+
+```sh
+sudo apt update
+sudo apt install -y git curl
+git clone https://github.com/bossartemii/rea-android.git
+cd rea-android
+git checkout feat/android-termux-installer
+bash scripts/install-android-linux.sh
+```
+
+The installer currently targets Debian/Ubuntu-family ARM64 guests using glibc.
+It installs build prerequisites and Node.js 24, checks the actual guest
+platform/architecture, installs the repository-pinned npm version, builds
+inside the VM, and installs REA for the Linux guest. It does not reuse
+Termux/Bionic binaries. Afterward run `rea setup` and `rea doctor --json`.
+
+This is a separate Linux guest install, so files and tools installed in Termux
+are not automatically available inside Debian, and vice versa. Android may
+pause or stop the VM when resources are constrained. The installer has not
+yet been executed on a physical Pixel Linux Terminal VM; treat this as an
+implementation path pending device validation, not a certified compatibility
+claim. Optional REA providers still depend on their own Linux/ARM64 support.
+
 ## Samsung Galaxy (Android, Termux)
 
 Samsung Galaxy phones with a 64-bit ARM Android userspace use the same Termux
