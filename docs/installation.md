@@ -57,6 +57,33 @@ provider limitations. The ARM64 installer path has not been certified on every
 Pixel firmware build; run the diagnostics on the target phone before relying on
 it for production work.
 
+## Samsung Galaxy (Android, Termux)
+
+Samsung Galaxy phones with a 64-bit ARM Android userspace use the same Termux
+installation path as Google Pixel. Snapdragon and Exynos are both supported at
+the CPU-architecture level; the installer checks the actual runtime ABI instead
+of relying on the phone's marketing name. One UI battery management can stop
+long-running terminal processes, so set Termux's battery usage to
+**Unrestricted** when persistent background work is required. Menu labels vary
+by One UI version.
+
+The same caveat applies as on Pixel: this is an ARM64/Termux build path, not a
+claim that every optional native reverse-engineering provider runs on Android.
+
+## iPhone and iPad (iOS)
+
+**Native local installation is not supported by this Termux installer.**
+Termux is an Android application and cannot be installed on iOS. iOS also does
+not provide the general-purpose background process and native dependency
+environment expected by REA's current Node.js CLI and stdio MCP server.
+
+To support iPhone and iPad properly, REA needs a separate remote architecture:
+run the REA server on a supported computer or server, expose an authenticated
+remote MCP transport over HTTPS, and connect an iOS-compatible MCP client.
+That transport and client integration are not delivered by this Android
+installer branch. Do not follow the Termux commands on iOS or treat an
+iSH/a-Shell workaround as supported REA installation.
+
 ## Start setup
 
 ```bash
